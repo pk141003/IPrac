@@ -1,0 +1,29 @@
+sudo apt update
+sudo apt install python3-opencv
+pip install numpy
+
+pip install picamera2
+
+import cv2
+from picamera2 import Picamera2
+# Initialize PiCamera2
+picam2 = Picamera2()
+picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size":
+(640, 480)}))
+picam2.start()
+# Load Haar Cascade
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades +
+'haarcascade_frontalface_default.xml')
+while True:
+ frame = picam2.capture_array() # Capture frame from PiCamera
+ gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+ # Detect faces
+ faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30,
+30))
+ # Draw bounding boxes
+ for (x, y, w, h) in faces:
+ cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+ cv2.imshow('Face Detection', frame)
+ if cv2.waitKey(1) & 0xFF == ord('q'):
+ break
+ cv2.destroyAllWindows()
