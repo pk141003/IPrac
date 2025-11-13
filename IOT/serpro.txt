@@ -1,0 +1,56 @@
+from flask import Flask, jsonify
+import random
+
+app = Flask(__name__)
+
+@app.route('/get_sensor_data', methods=['GET'])
+def get_sensor_data():
+    """Simulate temperature and humidity sensor data"""
+    temperature = round(random.uniform(20, 30), 2)
+    humidity = round(random.uniform(40, 60), 2)
+
+    data = {
+        "temperature": temperature,
+        "humidity": humidity
+    }
+    return jsonify(data)
+
+if __name__ == '__main__':
+    # Run the Sensor Service on port 5001
+    app.run(host='0.0.0.0', port=5001)
+
+from flask import Flask, jsonify
+import requests
+
+app = Flask(__name__)
+
+@app.route('/process_data', methods=['GET'])
+def process_data():
+    """Fetch data from sensor service and process it"""
+    try:
+        response = requests.get("http://localhost:5001/get_sensor_data")
+        
+        if response.status_code != 200:
+            return jsonify({"error": "Failed to retrieve sensor data"}), 500
+
+        data = response.json()
+
+        # Add an alert based on temperature
+        if data['temperature'] > 28:
+            data['alert'] = "High Temperature"
+        else:
+            data['alert'] = "Normal"
+
+        return jsonify(data)
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+if __name__ == '__main__':
+    # Run the Process Service on port 5002
+    app.run(host='0.0.0.0', port=5002)
+
+
+a. pip install Flask
+b. pip install requests
